@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Velto — Tus finanzas con claridad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2d1a4a; --accent: #47C5A8; --accent-dark: #35a08a;
+      --accent-light: rgba(71,197,168,0.12); --danger: #e05c3a;
+      --danger-light: #fde8e4; --warning: #f59e0b; --success: #10b981;
+      --success-light: #d1fae5; --bg: #f2f0f6; --card: #fff;
+      --text: #1a1a2e; --muted: #6b7280; --border: #e5e7eb;
+    }
+    html, body { height: 100%; }
+    body { background: #120c1f; font-family: 'Inter', system-ui, sans-serif; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    #root { width: 100%; max-width: 430px; height: 100vh; background: var(--bg); position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 100px rgba(71,197,168,0.08), 0 0 40px rgba(0,0,0,0.6); }
+    @media (min-width: 600px) { #root { border-radius: 40px; height: 90vh; } body { padding: 20px; } }
+    .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .scroll-area::-webkit-scrollbar { display: none; }
+    .bottom-nav { display: flex; align-items: center; background: var(--card); border-top: 1px solid var(--border); height: 64px; flex-shrink: 0; position: relative; z-index: 20; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: none; color: var(--muted); font-family: inherit; font-size: 10px; font-weight: 500; padding: 6px 4px; transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
+    .nav-item.active { color: var(--primary); }
+    .nav-item svg { width: 22px; height: 22px; }
+    .nav-fab-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .nav-fab { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #3d2a5a 0%, var(--primary) 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid var(--bg); box-shadow: 0 4px 20px rgba(45,26,74,0.45); margin-top: -16px; transition: transform 0.15s; }
+    .nav-fab:active { transform: scale(0.93); }
+    .card { background: var(--card); border-radius: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+    .btn-primary { background: var(--primary); color: white; border: none; border-radius: 14px; height: 52px; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s, transform 0.1s; }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; }
+    .btn-danger { background: var(--danger); color: white; border: none; border-radius: 14px; height: 48px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; height: 48px; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; }
+    .btn-outline-danger { background: transparent; color: var(--danger); border: 1.5px solid rgba(224,92,58,0.35); border-radius: 14px; height: 48px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
+    .input { width: 100%; height: 50px; border: 1.5px solid var(--border); border-radius: 12px; padding: 0 16px; font-family: inherit; font-size: 15px; color: var(--text); background: white; outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
+    .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45,26,74,0.08); }
+    .segmented { display: flex; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 3px; gap: 2px; }
+    .seg-btn { flex: 1; height: 34px; border-radius: 9px; border: none; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: rgba(255,255,255,0.55); transition: all 0.2s; }
+    .seg-btn.active { background: white; color: var(--primary); font-weight: 700; box-shadow: 0 1px 6px rgba(0,0,0,0.12); }
+    .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+    .chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .chip-accent { background: var(--accent-light); color: var(--accent-dark); }
+    .chip-danger { background: var(--danger-light); color: var(--danger); }
+    .chip-primary { background: rgba(45,26,74,0.08); color: var(--primary); }
+    .chip-warn { background: #fef3c7; color: #b45309; }
+    .chip-success { background: var(--success-light); color: #065f46; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes obSlide { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+    .anim-fade { animation: fadeSlideIn 0.35s ease both; }
+    .anim-scale { animation: scaleIn 0.3s ease both; }
+    .anim-ob { animation: obSlide 0.4s ease both; }
+    .filter-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+    .filter-pill.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: 600; }
+    .row-divider { height: 1px; background: var(--border); margin: 0 14px; }
+    .sheet-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 50; display: flex; align-items: flex-end; animation: fadeIn 0.2s ease; }
+    .sheet-panel { background: white; border-radius: 24px 24px 0 0; width: 100%; max-height: 90%; overflow-y: auto; animation: slideUp 0.32s cubic-bezier(0.32,0.72,0,1); padding-bottom: 32px; }
+    .sheet-panel::-webkit-scrollbar { display: none; }
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 10px auto 4px; }
+    .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s; }
+    .color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
+    .label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 7px; }
+    .form-row { margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const C = {
+  primary:'#2d1a4a', primaryDark:'#1d1030', accent:'#47C5A8', accentDark:'#35a08a',
+  accentLight:'rgba(71,197,168,0.12)', danger:'#e05c3a', dangerLight:'#fde8e4',
+  warning:'#f59e0b', success:'#10b981', successLight:'#d1fae5',
+  bg:'#f2f0f6', card:'#fff', text:'#1a1a2e', muted:'#6b7280', border:'#e5e7eb',
+};
+const SWATCHES = [C.primary, C.accent, C.danger, C.success, '#9b6dbd', '#f59e0b', '#3b82f6', '#ec4899'];
+
+// ── INITIAL DATA ──────────────────────────────────────────────────────────────
+const INIT_TXNS = [
+  { id:1,  name:'Nómina ACME Corp',       icon:'💰', cat:'Ingreso',    amount:18500, date:'2026-04-22', type:'income',  note:'' },
+  { id:2,  name:'Starbucks',              icon:'☕', cat:'Café',       amount:-89,   date:'2026-04-22', type:'expense', note:'Latte grande' },
+  { id:3,  name:'Netflix',               icon:'🎬', cat:'Streaming',  amount:-199,  date:'2026-04-21', type:'expense', note:'' },
+  { id:4,  name:'Uber Eats',             icon:'🍕', cat:'Comida',     amount:-350,  date:'2026-04-21', type:'expense', note:'' },
+  { id:5,  name:'Gasolinera Shell',      icon:'⛽', cat:'Transporte', amount:-800,  date:'2026-04-21', type:'expense', note:'' },
+  { id:6,  name:'Walmart',               icon:'🛒', cat:'Comida',     amount:-1240, date:'2026-04-20', type:'expense', note:'Despensa quincenal' },
+  { id:7,  name:'Spotify',               icon:'🎵', cat:'Streaming',  amount:-99,   date:'2026-04-20', type:'expense', note:'' },
+  { id:8,  name:'Gym Smart Fit',         icon:'💪', cat:'Salud',      amount:-650,  date:'2026-04-19', type:'expense', note:'' },
+  { id:9,  name:'Transferencia recibida',icon:'💸', cat:'Ingreso',    amount:3500,  date:'2026-04-19', type:'income',  note:'' },
+  { id:10, name:'Farmacia Guadalajara',  icon:'💊', cat:'Salud',      amount:-280,  date:'2026-04-18', type:'expense', note:'' },
+  { id:11, name:'El Bajío Restaurante',  icon:'🍽', cat:'Comida',     amount:-760,  date:'2026-04-17', type:'expense', note:'Cena cumple' },
+  { id:12, name:'H&M',                   icon:'👕', cat:'Ropa',       amount:-1200, date:'2026-04-15', type:'expense', note:'' },
+];
+const INIT_BUDGETS = [
+  { id:1, name:'Comida',          icon:'🍽', budget:7000, spent:6916, color:C.primary },
+  { id:2, name:'Transporte',      icon:'🚗', budget:5000, spent:4004, color:C.accent  },
+  { id:3, name:'Entretenimiento', icon:'🎬', budget:3000, spent:3276, color:C.danger  },
+  { id:4, name:'Salud',           icon:'💊', budget:2500, spent:930,  color:C.success },
+  { id:5, name:'Ropa',            icon:'👕', budget:2000, spent:1200, color:'#9b6dbd' },
+];
+const INIT_GOALS = [
+  { id:1, name:'Vacaciones Europa', icon:'✈️', target:30000, saved:18200, deadline:'2026-06-30', color:C.accent   },
+  { id:2, name:'Fondo emergencia',  icon:'🛡️', target:50000, saved:32000, deadline:'2026-12-31', color:C.primary  },
+  { id:3, name:'MacBook Pro',       icon:'💻', target:42000, saved:5000,  deadline:'2026-10-15', color:'#9b6dbd' },
+];
+const MONTHLY = {
+  labels:['Oct','Nov','Dic','Ene','Feb','Mar','Abr'],
+  income:[20000,21500,24000,18500,22000,21000,24500],
+  expenses:[14000,16000,18500,15000,17500,16200,18200],
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const fmt    = n => (n>=0?'+':'-')+'$'+Math.abs(n).toLocaleString('es-MX');
+const fmtAbs = n => '$'+Math.abs(n).toLocaleString('es-MX');
+const groupByDate = txns => {
+  const g={};
+  txns.forEach(t=>{(g[t.date]=g[t.date]||[]).push(t);});
+  return Object.entries(g).sort((a,b)=>b[0].localeCompare(a[0]));
+};
+const dateLabel = d => {
+  if(d==='2026-04-22') return 'Hoy';
+  if(d==='2026-04-21') return 'Ayer';
+  return new Date(d).toLocaleDateString('es-MX',{day:'numeric',month:'long'});
+};
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+const Sparkline = ({ data, color=C.accent, height=60 }) => {
+  const max=Math.max(...data),min=Math.min(...data),rng=(max-min)||1;
+  const W=260,H=height-10;
+  const pts=data.map((v,i)=>`${(i/(data.length-1))*W},${H-((v-min)/rng)*H}`);
+  const path=`M ${pts.join(' L ')}`;
+  const area=`${path} L ${W},${H} L 0,${H} Z`;
+  const lastY=H-((data[data.length-1]-min)/rng)*H;
+  return (
+    <svg viewBox={`0 0 ${W} ${height}`} width="100%" style={{display:'block'}}>
+      <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity="0.28"/><stop offset="100%" stopColor={color} stopOpacity="0"/></linearGradient></defs>
+      <path d={area} fill="url(#sg)"/>
+      <path d={path} stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx={W} cy={lastY} r="4.5" fill={color} stroke="white" strokeWidth="2.5"/>
+    </svg>
+  );
+};
+const BarChart = ({ income, expenses, labels }) => {
+  const max=Math.max(...income,...expenses);
+  const H=80,bW=9,gap=3,gW=bW*2+gap,totalW=labels.length*(gW+10);
+  return (
+    <svg viewBox={`0 0 ${totalW} ${H+18}`} width="100%" style={{display:'block'}}>
+      {labels.map((lbl,i)=>{
+        const x=i*(gW+10),ih=(income[i]/max)*H,eh=(expenses[i]/max)*H;
+        return <g key={i} transform={`translate(${x},0)`}>
+          <rect x={0} y={H-ih} width={bW} height={ih} rx="3" fill={C.primary} fillOpacity="0.75"/>
+          <rect x={bW+gap} y={H-eh} width={bW} height={eh} rx="3" fill={C.accent}/>
+          <text x={gW/2} y={H+14} textAnchor="middle" fontSize="9" fill={C.muted} fontFamily="Inter,sans-serif">{lbl}</text>
+        </g>;
+      })}
+    </svg>
+  );
+};
+const Donut = ({ segments, size=108 }) => {
+  const r=38,cx=size/2,cy=size/2,circ=2*Math.PI*r;
+  let off=0;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#ede9f4" strokeWidth="16"/>
+      {segments.map((s,i)=>{const dash=(s.pct/100)*circ;const el=<circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth="16" strokeDasharray={`${dash} ${circ-dash}`} strokeDashoffset={-off} transform={`rotate(-90 ${cx} ${cy})`}/>;off+=dash;return el;})}
+      <circle cx={cx} cy={cy} r={28} fill="white"/>
+    </svg>
+  );
+};
+
+// ── ICONS ─────────────────────────────────────────────────────────────────────
+const I = {
+  Home:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  List:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+  Plus:()=><svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Chart:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>,
+  User:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  Bell:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+  Search:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Filter:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
+  Chevron:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  Back:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  Close:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Check:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Edit:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
+  Card:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+  Target:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  Trending:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+  Shield:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Help:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Logout:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  Eye:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+  Flag:()=><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>,
+};
+
+// ── BOTTOM NAV ────────────────────────────────────────────────────────────────
+const BottomNav = ({ screen, setScreen }) => {
+  const left  = [{id:'dashboard',label:'Inicio',Icon:I.Home},{id:'transactions',label:'Listas',Icon:I.List}];
+  const right = [{id:'reports',label:'Reportes',Icon:I.Chart},{id:'profile',label:'Perfil',Icon:I.User}];
+  const NavBtn = ({id,label,Icon}) => (
+    <button className={`nav-item ${screen===id?'active':''}`} onClick={()=>setScreen(id)}>
+      <Icon/><span>{label}</span>
+    </button>
+  );
+  return (
+    <nav className="bottom-nav">
+      {left.map(n=><NavBtn key={n.id} {...n}/>)}
+      <div className="nav-fab-wrap">
+        <div className="nav-fab" onClick={()=>setScreen('new')}><I.Plus/></div>
+      </div>
+      {right.map(n=><NavBtn key={n.id} {...n}/>)}
+    </nav>
+  );
+};
+
+// ── 1. ONBOARDING ─────────────────────────────────────────────────────────────
+const OnboardingScreen = ({ onDone }) => {
+  const [step, setStep] = useState(0);
+  const slides = [
+    { emoji:'💸', title:'¿A dónde va tu dinero?',    sub:'Velto registra cada peso y te muestra el panorama completo de tus finanzas.' },
+    { emoji:'📊', title:'Reportes que sí entiendes', sub:'Gráficas simples, insights útiles — sin jerga financiera ni complicaciones.' },
+    { emoji:'🎯', title:'Metas reales',              sub:'Define objetivos concretos y celebra cada avance en tu camino al ahorro.' },
+  ];
+  const s = slides[step];
+  const next = () => step < slides.length - 1 ? setStep(step+1) : onDone();
+  return (
+    <div style={{flex:1,display:'flex',flexDirection:'column',background:'white',overflow:'hidden'}}>
+      {/* Illustration */}
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,flex:'0 0 55%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',overflow:'hidden'}}>
+        {/* Decorative rings */}
+        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',border:'1px solid rgba(71,197,168,0.12)',top:'50%',left:'50%',transform:'translate(-50%,-50%)'}}/>
+        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',border:'1px solid rgba(71,197,168,0.18)',top:'50%',left:'50%',transform:'translate(-50%,-50%)'}}/>
+        <div key={step} className="anim-ob" style={{fontSize:88,lineHeight:1,marginBottom:16}}>{s.emoji}</div>
+        {/* Dots */}
+        <div style={{display:'flex',gap:6,position:'absolute',bottom:24}}>
+          {slides.map((_,i)=>(
+            <div key={i} onClick={()=>setStep(i)} style={{width:i===step?24:8,height:8,borderRadius:4,background:i===step?C.accent:'rgba(255,255,255,0.25)',cursor:'pointer',transition:'all 0.3s'}}/>
+          ))}
+        </div>
+        {/* Skip */}
+        <button onClick={onDone} style={{position:'absolute',top:20,right:20,background:'rgba(255,255,255,0.12)',border:'none',color:'rgba(255,255,255,0.6)',fontSize:13,fontWeight:500,fontFamily:'inherit',padding:'6px 14px',borderRadius:20,cursor:'pointer'}}>Omitir</button>
+      </div>
+      {/* Content */}
+      <div style={{flex:1,padding:'32px 28px 40px',display:'flex',flexDirection:'column'}}>
+        <div key={step} className="anim-fade">
+          <div style={{fontSize:26,fontWeight:800,color:C.text,lineHeight:1.2,marginBottom:12,letterSpacing:'-0.5px'}}>{s.title}</div>
+          <div style={{fontSize:15,color:C.muted,lineHeight:1.65}}>{s.sub}</div>
+        </div>
+        <div style={{flex:1}}/>
+        <button className="btn-primary" onClick={next} style={{marginBottom:14}}>
+          {step<slides.length-1?'Siguiente →':'Comenzar con Velto'}
+        </button>
+        {step<slides.length-1 && (
+          <button className="btn-outline" onClick={onDone}>Ya tengo cuenta</button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+const LoginScreen = ({ onLogin }) => {
+  const [email,setEmail]=useState('');
+  const [pass,setPass]=useState('');
+  const [loading,setLoading]=useState(false);
+  const [showPass,setShowPass]=useState(false);
+  const handle = () => { setLoading(true); setTimeout(()=>{setLoading(false);onLogin();},1200); };
+  return (
+    <div className="anim-fade" style={{flex:1,background:'white',display:'flex',flexDirection:'column',overflow:'auto'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'60px 32px 56px',textAlign:'center',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-40,right:-40,width:180,height:180,borderRadius:'50%',background:'rgba(71,197,168,0.06)',border:'1px solid rgba(71,197,168,0.1)'}}/>
+        <div style={{width:76,height:76,borderRadius:24,background:'rgba(71,197,168,0.15)',border:'1.5px solid rgba(71,197,168,0.3)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
+          <span style={{fontSize:38}}>₱</span>
+        </div>
+        <div style={{fontSize:36,fontWeight:800,color:'white',letterSpacing:'-1px'}}>Velto</div>
+        <div style={{fontSize:15,color:'rgba(255,255,255,0.5)',marginTop:6}}>Tus finanzas, con claridad</div>
+        <div style={{position:'absolute',bottom:-1,left:0,right:0}}>
+          <svg viewBox="0 0 430 32" preserveAspectRatio="none" style={{width:'100%',height:32,display:'block'}}><path d="M0,32 C100,4 330,32 430,12 L430,32 Z" fill="white"/></svg>
+        </div>
+      </div>
+      <div style={{padding:'28px 28px 48px',display:'flex',flexDirection:'column',gap:16}}>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          <label style={{fontSize:13,fontWeight:500,color:C.muted}}>Correo electrónico</label>
+          <input className="input" type="email" placeholder="nombre@correo.com" value={email} onChange={e=>setEmail(e.target.value)}/>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          <label style={{fontSize:13,fontWeight:500,color:C.muted}}>Contraseña</label>
+          <div style={{position:'relative'}}>
+            <input className="input" type={showPass?'text':'password'} placeholder="••••••••" value={pass} onChange={e=>setPass(e.target.value)} style={{paddingRight:46}}/>
+            <button onClick={()=>setShowPass(v=>!v)} style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:C.muted,width:20,height:20,padding:0}}><I.Eye/></button>
+          </div>
+          <div style={{textAlign:'right'}}><span style={{fontSize:13,color:C.primary,fontWeight:600,cursor:'pointer'}}>¿Olvidaste tu contraseña?</span></div>
+        </div>
+        <button className="btn-primary" onClick={handle} disabled={loading} style={{marginTop:4}}>
+          {loading?<span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><span style={{width:16,height:16,border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'white',borderRadius:'50%',display:'inline-block',animation:'spin 0.7s linear infinite'}}/>Iniciando sesión...</span>:'Entrar'}
+        </button>
+        <div style={{display:'flex',alignItems:'center',gap:12,margin:'4px 0'}}>
+          <hr style={{flex:1,border:'none',borderTop:`1px solid ${C.border}`}}/>
+          <span style={{fontSize:13,color:C.muted,whiteSpace:'nowrap'}}>o continúa con</span>
+          <hr style={{flex:1,border:'none',borderTop:`1px solid ${C.border}`}}/>
+        </div>
+        <button className="btn-outline" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10}}>
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          <span style={{fontSize:15,fontWeight:500}}>Continuar con Google</span>
+        </button>
+        <div style={{textAlign:'center',marginTop:8}}>
+          <span style={{fontSize:14,color:C.muted}}>¿No tienes cuenta? </span>
+          <span style={{fontSize:14,color:C.primary,fontWeight:700,cursor:'pointer'}}>Regístrate gratis</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+const DashboardScreen = ({ txns, setScreen, onTxnClick }) => {
+  const savings=MONTHLY.income.map((inc,i)=>inc-MONTHLY.expenses[i]);
+  const recent=txns.slice(0,4);
+  return (
+    <div className="anim-fade" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'48px 20px 32px',position:'relative',flexShrink:0}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <div><div style={{fontSize:13,color:'rgba(255,255,255,0.5)'}}>Buenos días 👋</div><div style={{fontSize:20,fontWeight:800,color:'white'}}>Carlos</div></div>
+          <button style={{width:40,height:40,borderRadius:12,background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'rgba(255,255,255,0.75)'}}><I.Bell/></button>
+        </div>
+        <div style={{textAlign:'center',marginBottom:20}}>
+          <div style={{fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:4}}>Balance total · Abril 2026</div>
+          <div style={{fontSize:44,fontWeight:800,color:C.accent,letterSpacing:'-1.5px',lineHeight:1}}>$42,380</div>
+          <div style={{fontSize:13,color:'rgba(255,255,255,0.35)',marginTop:6}}>MXN · ≈ USD $2,119</div>
+        </div>
+        <div style={{display:'flex',gap:10}}>
+          {[{label:'↑ Ingresos',val:24500,color:C.accent,bg:'rgba(71,197,168,0.15)',border:'rgba(71,197,168,0.25)'},{label:'↓ Gastos',val:18200,color:'#ffb3a0',bg:'rgba(224,92,58,0.12)',border:'rgba(224,92,58,0.2)'}].map((k,i)=>(
+            <div key={i} style={{flex:1,background:k.bg,border:`1px solid ${k.border}`,borderRadius:14,padding:'11px 14px'}}>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginBottom:4}}>{k.label}</div>
+              <div style={{fontSize:18,fontWeight:700,color:k.color}}>${k.val.toLocaleString('es-MX')}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{position:'absolute',bottom:-1,left:0,right:0}}>
+          <svg viewBox="0 0 430 24" preserveAspectRatio="none" style={{width:'100%',height:24,display:'block'}}><path d="M0,24 C120,2 310,24 430,8 L430,24 Z" fill={C.bg}/></svg>
+        </div>
+      </div>
+      <div className="scroll-area" style={{padding:'12px 16px 20px'}}>
+        <div style={{display:'flex',gap:8,marginBottom:18}}>
+          {[{label:'+ Gasto',color:C.danger,bg:'#fde8e4',s:'new'},{label:'+ Ingreso',color:C.success,bg:C.successLight,s:'new'},{label:'Metas',color:C.primary,bg:'rgba(45,26,74,0.07)',s:'goals'}].map((a,i)=>(
+            <button key={i} onClick={()=>setScreen(a.s)} style={{flex:1,height:40,border:'none',borderRadius:11,background:a.bg,color:a.color,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{a.label}</button>
+          ))}
+        </div>
+        <div className="card" style={{marginBottom:16,padding:'16px 16px 10px',background:`linear-gradient(135deg,${C.primaryDark},${C.primary})`,overflow:'hidden'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+            <div><div style={{fontSize:12,color:'rgba(255,255,255,0.45)',marginBottom:3}}>Ahorro acumulado</div><div style={{fontSize:24,fontWeight:800,color:C.accent}}>+$6,300 <span style={{fontSize:13,color:'#a8e6c8',fontWeight:500}}>↑ 14%</span></div></div>
+            <button onClick={()=>setScreen('reports')} style={{fontSize:12,color:'rgba(255,255,255,0.4)',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>Ver más ›</button>
+          </div>
+          <Sparkline data={savings} color={C.accent} height={54}/>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}><span style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>Oct</span><span style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>Abr</span></div>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <div style={{fontSize:16,fontWeight:700,color:C.text}}>Recientes</div>
+          <button onClick={()=>setScreen('transactions')} style={{fontSize:13,color:C.primary,fontWeight:600,background:'none',border:'none',cursor:'pointer',fontFamily:'inherit'}}>Ver todos ›</button>
+        </div>
+        <div className="card" style={{padding:'4px'}}>
+          {recent.map((t,i)=>(
+            <div key={t.id}>
+              {i>0&&<div className="row-divider"/>}
+              <div onClick={()=>onTxnClick(t)} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',cursor:'pointer'}}>
+                <div style={{width:44,height:44,borderRadius:14,background:t.type==='income'?C.accentLight:'#fde8e4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,flexShrink:0}}>{t.icon}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.name}</div>
+                  <div style={{fontSize:12,color:C.muted,marginTop:1}}>{t.cat} · {dateLabel(t.date)}</div>
+                </div>
+                <div style={{fontSize:15,fontWeight:700,color:t.type==='income'?C.accentDark:C.danger,flexShrink:0}}>{fmt(t.amount)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{marginTop:16,padding:'14px 16px',background:'#fffbeb',border:'1px solid rgba(245,158,11,0.25)',borderRadius:16}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#b45309',marginBottom:5}}>💡 Insight del día</div>
+          <div style={{fontSize:13,color:'#555',lineHeight:1.55}}>Gastas 34% más en restaurantes vs. el mes pasado. <span style={{color:C.primary,fontWeight:600,cursor:'pointer'}}>Ver desglose →</span></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── TRANSACTIONS + BUDGET ─────────────────────────────────────────────────────
+const TransactionsScreen = ({ txns, budgets, setScreen, onTxnClick, onBudgetEdit, onBudgetNew }) => {
+  const [tab,setTab]=useState('txns');
+  const [filter,setFilter]=useState('Todos');
+  const [q,setQ]=useState('');
+  const filtered=txns.filter(t=>{
+    if(filter==='Gastos'&&t.type!=='expense')return false;
+    if(filter==='Ingresos'&&t.type!=='income')return false;
+    if(q&&!t.name.toLowerCase().includes(q.toLowerCase())&&!t.cat.toLowerCase().includes(q.toLowerCase()))return false;
+    return true;
+  });
+  const grouped=groupByDate(filtered);
+  const totalB=budgets.reduce((s,b)=>s+b.budget,0);
+  const totalS=budgets.reduce((s,b)=>s+b.spent,0);
+  return (
+    <div className="anim-fade" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'48px 20px 20px',flexShrink:0}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <div style={{fontSize:22,fontWeight:800,color:'white'}}>Listas</div>
+          {tab==='budget'&&<button onClick={onBudgetNew} style={{background:C.accent,border:'none',color:'white',fontSize:13,fontWeight:700,padding:'7px 16px',borderRadius:20,cursor:'pointer',fontFamily:'inherit'}}>+ Nueva</button>}
+        </div>
+        <div className="segmented">
+          <button className={`seg-btn ${tab==='txns'?'active':''}`} onClick={()=>setTab('txns')}>Transacciones</button>
+          <button className={`seg-btn ${tab==='budget'?'active':''}`} onClick={()=>setTab('budget')}>Presupuesto</button>
+        </div>
+      </div>
+
+      {tab==='budget' ? (
+        <div className="scroll-area" style={{padding:'16px'}}>
+          <div className="card" style={{background:`linear-gradient(135deg,${C.primaryDark},${C.primary})`,marginBottom:16,padding:'18px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:12}}>
+              <div><div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginBottom:3}}>Gastado</div><div style={{fontSize:26,fontWeight:800,color:C.accent}}>${totalS.toLocaleString('es-MX')}</div></div>
+              <div style={{textAlign:'right'}}><div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginBottom:3}}>Presupuesto</div><div style={{fontSize:26,fontWeight:700,color:'rgba(255,255,255,0.6)'}}>${totalB.toLocaleString('es-MX')}</div></div>
+            </div>
+            <div className="progress-bar" style={{background:'rgba(255,255,255,0.15)'}}><div className="progress-fill" style={{width:`${Math.min(totalS/totalB*100,100).toFixed(0)}%`,background:C.accent}}/></div>
+            <div style={{fontSize:12,color:'rgba(255,255,255,0.4)',marginTop:6}}>Te quedan ${(totalB-totalS).toLocaleString('es-MX')} para el mes</div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {budgets.map((b)=>{
+              const pct=Math.min(b.spent/b.budget*100,100);
+              const over=b.spent>b.budget;
+              return (
+                <div key={b.id} className="card" style={{padding:'14px 16px',border:over?`1.5px solid rgba(224,92,58,0.25)`:'none'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                    <div style={{width:42,height:42,borderRadius:13,background:b.color+'18',display:'flex',alignItems:'center',justifyContent:'center',fontSize:21}}>{b.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:15,fontWeight:700}}>{b.name}</div>
+                      <div style={{fontSize:12,color:C.muted}}>{Math.round(pct)}% utilizado</div>
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div style={{textAlign:'right'}}>
+                        <div style={{fontSize:15,fontWeight:700,color:over?C.danger:C.text}}>${b.spent.toLocaleString('es-MX')}</div>
+                        <div style={{fontSize:12,color:C.muted}}>/ ${b.budget.toLocaleString('es-MX')}</div>
+                      </div>
+                      <button onClick={()=>onBudgetEdit(b)} style={{width:32,height:32,borderRadius:9,background:C.bg,border:'none',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:C.muted,flexShrink:0}}><I.Edit/></button>
+                    </div>
+                  </div>
+                  <div className="progress-bar"><div className="progress-fill" style={{width:`${pct}%`,background:over?C.danger:b.color}}/></div>
+                  {over&&<div style={{fontSize:12,color:C.danger,marginTop:6,fontWeight:600}}>⚠ Excediste por ${(b.spent-b.budget).toLocaleString('es-MX')}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div style={{padding:'12px 16px 10px',background:'white',boxShadow:'0 2px 8px rgba(0,0,0,0.04)',flexShrink:0}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,background:C.bg,borderRadius:12,padding:'9px 14px',marginBottom:10}}>
+              <div style={{color:C.muted,width:18,height:18,flexShrink:0}}><I.Search/></div>
+              <input style={{border:'none',background:'none',outline:'none',fontFamily:'Inter,sans-serif',fontSize:14,color:C.text,width:'100%'}} placeholder="Buscar transacción..." value={q} onChange={e=>setQ(e.target.value)}/>
+            </div>
+            <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:2}}>
+              {['Todos','Gastos','Ingresos'].map(f=>(
+                <button key={f} className={`filter-pill ${filter===f?'active':''}`} onClick={()=>setFilter(f)}>{f}</button>
+              ))}
+            </div>
+          </div>
+          <div className="scroll-area" style={{padding:'12px 16px 20px'}}>
+            {grouped.length===0
+              ? <div style={{textAlign:'center',padding:'48px 0',color:C.muted}}>Sin resultados</div>
+              : grouped.map(([date,txnGroup])=>(
+                <div key={date} style={{marginBottom:16}}>
+                  <div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:'uppercase',letterSpacing:0.8,marginBottom:8}}>{dateLabel(date)}</div>
+                  <div className="card" style={{padding:'4px'}}>
+                    {txnGroup.map((t,i)=>(
+                      <div key={t.id}>
+                        {i>0&&<div className="row-divider"/>}
+                        <div onClick={()=>onTxnClick(t)} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',cursor:'pointer'}}>
+                          <div style={{width:44,height:44,borderRadius:14,background:t.type==='income'?C.accentLight:'#fde8e4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,flexShrink:0}}>{t.icon}</div>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:14,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.name}</div>
+                            <span className={`chip ${t.type==='income'?'chip-accent':'chip-danger'}`} style={{marginTop:3,display:'inline-block'}}>{t.cat}</span>
+                          </div>
+                          <div style={{fontSize:15,fontWeight:700,color:t.type==='income'?C.accentDark:C.danger,flexShrink:0}}>{fmt(t.amount)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+          <div onClick={()=>setScreen('new')} style={{position:'absolute',bottom:72,right:16,width:52,height:52,borderRadius:'50%',background:C.primary,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',boxShadow:'0 4px 16px rgba(45,26,74,0.45)'}}>
+            <span style={{color:C.accent,fontSize:28,lineHeight:1,marginTop:-2}}>+</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// ── REPORTS ───────────────────────────────────────────────────────────────────
+const ReportsScreen = () => {
+  const [period,setPeriod]=useState('Mes');
+  const savings=MONTHLY.income.map((inc,i)=>inc-MONTHLY.expenses[i]);
+  const segments=[{label:'Comida',pct:38,color:C.primary},{label:'Transporte',pct:22,color:C.accent},{label:'Entretenimiento',pct:18,color:C.danger},{label:'Otros',pct:22,color:'#9b6dbd'}];
+  return (
+    <div className="anim-fade" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'48px 20px 20px',flexShrink:0}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <div style={{fontSize:22,fontWeight:800,color:'white'}}>Reportes</div>
+          <div style={{fontSize:12,color:C.accent,fontWeight:600,background:'rgba(71,197,168,0.15)',padding:'6px 14px',borderRadius:20,border:'1px solid rgba(71,197,168,0.25)'}}>MXN ▾</div>
+        </div>
+        <div className="segmented">
+          {['Mes','Trimestre','Año'].map(p=><button key={p} className={`seg-btn ${period===p?'active':''}`} onClick={()=>setPeriod(p)}>{p}</button>)}
+        </div>
+      </div>
+      <div className="scroll-area" style={{padding:'16px'}}>
+        <div className="card" style={{background:`linear-gradient(135deg,${C.primaryDark},${C.primary})`,marginBottom:16,padding:'18px 16px 12px'}}>
+          <div style={{fontSize:12,color:'rgba(255,255,255,0.45)',marginBottom:4}}>Tendencia de ahorro</div>
+          <div style={{fontSize:28,fontWeight:800,color:C.accent,marginBottom:12}}>+$6,300 <span style={{fontSize:14,color:'#a8e6c8',fontWeight:500}}>↑ 14%</span></div>
+          <Sparkline data={savings} color={C.accent} height={60}/>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}><span style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>Oct</span><span style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>Abr</span></div>
+        </div>
+        <div className="card" style={{marginBottom:16,padding:'16px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <div style={{fontSize:15,fontWeight:700}}>Ingresos vs Gastos</div>
+            <div style={{display:'flex',gap:12}}>{[{c:C.primary,l:'Ingr.'},{c:C.accent,l:'Gasto'}].map(({c,l})=><div key={l} style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:10,height:10,borderRadius:2,background:c}}/><span style={{fontSize:11,color:C.muted}}>{l}</span></div>)}</div>
+          </div>
+          <BarChart income={MONTHLY.income} expenses={MONTHLY.expenses} labels={MONTHLY.labels}/>
+        </div>
+        <div className="card" style={{marginBottom:16,padding:'16px'}}>
+          <div style={{fontSize:15,fontWeight:700,marginBottom:14}}>Distribución de gastos</div>
+          <div style={{display:'flex',alignItems:'center',gap:16}}>
+            <div style={{flexShrink:0,position:'relative'}}><Donut segments={segments}/><div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center'}}><div style={{fontSize:10,color:C.muted}}>$18,200</div></div></div>
+            <div style={{flex:1,display:'flex',flexDirection:'column',gap:10}}>{segments.map((s,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:10,height:10,borderRadius:3,background:s.color,flexShrink:0}}/><span style={{fontSize:13,flex:1}}>{s.label}</span><span style={{fontSize:14,fontWeight:700}}>{s.pct}%</span></div>)}</div>
+          </div>
+        </div>
+        <div className="card" style={{marginBottom:16,padding:'16px'}}>
+          <div style={{fontSize:15,fontWeight:700,marginBottom:12}}>Top categorías · Abril</div>
+          {[{name:'Comida',amount:'$6,916',change:'+12%',neg:true},{name:'Transporte',amount:'$4,004',change:'-5%',neg:false},{name:'Entretenimiento',amount:'$3,276',change:'+2%',neg:true}].map((c,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 0',borderTop:i>0?`1px solid ${C.border}`:'none'}}>
+              <span style={{fontSize:14,fontWeight:500}}>{c.name}</span>
+              <div style={{display:'flex',alignItems:'center',gap:10}}><span className={`chip ${c.neg?'chip-danger':'chip-accent'}`}>{c.change}</span><span style={{fontSize:15,fontWeight:700}}>{c.amount}</span></div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:'16px',background:'#fffbeb',border:'1.5px dashed rgba(245,158,11,0.4)',borderRadius:16,marginBottom:8}}>
+          <div style={{fontSize:14,fontWeight:700,color:'#b45309',marginBottom:6}}>📈 Proyección Mayo</div>
+          <div style={{fontSize:14,color:'#555',lineHeight:1.6}}>Con tu ritmo actual, cerrarás con <strong style={{color:C.primary}}>$5,800</strong> de ahorro.</div>
+          <button style={{marginTop:12,width:'100%',height:40,borderRadius:10,background:'linear-gradient(135deg,#f59e0b,#fbbf24)',border:'none',color:'white',fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Ver plan de ahorro →</button>
+        </div>
+        <div style={{padding:'14px 16px',background:C.accentLight,border:`1.5px solid rgba(71,197,168,0.25)`,borderRadius:16}}>
+          <div style={{fontSize:13,fontWeight:700,color:C.accentDark,marginBottom:4}}>✅ Este mes ahorraste más</div>
+          <div style={{fontSize:13,color:'#444',lineHeight:1.55}}>Redujiste gastos en restaurantes un 12% vs. marzo.</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── NEW / EDIT TRANSACTION ────────────────────────────────────────────────────
+const NewScreen = ({ editTxn, onSave, onDelete, onClose }) => {
+  const [type,setType]=useState(editTxn?.type||'expense');
+  const [amount,setAmount]=useState(editTxn?String(Math.abs(editTxn.amount)):'');
+  const [name,setName]=useState(editTxn?.name||'');
+  const [cat,setCat]=useState(editTxn?.cat||'');
+  const [date,setDate]=useState(editTxn?.date||'2026-04-22');
+  const [note,setNote]=useState(editTxn?.note||'');
+  const [saved,setSaved]=useState(false);
+  const [confirmDel,setConfirmDel]=useState(false);
+  const expCats=['Comida','Transporte','Entretenimiento','Salud','Ropa','Streaming','Café','Otros'];
+  const incCats=['Nómina','Freelance','Inversión','Transferencia','Otro'];
+  const cats=type==='expense'?expCats:incCats;
+  const canSave=amount&&name&&cat;
+  const isEdit=!!editTxn;
+
+  const save=()=>{
+    const txn={
+      id:editTxn?.id||Date.now(),
+      name,cat,date,note,type,
+      amount:type==='expense'?-Math.abs(Number(amount)):Math.abs(Number(amount)),
+      icon:editTxn?.icon||(type==='income'?'💰':'💸'),
+    };
+    setSaved(true);
+    setTimeout(()=>onSave(txn),800);
+  };
+
+  if(saved) return (
+    <div className="anim-scale" style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'white',gap:14}}>
+      <div style={{width:76,height:76,borderRadius:'50%',background:C.accentLight,display:'flex',alignItems:'center',justifyContent:'center',color:C.accent}}><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div style={{fontSize:22,fontWeight:800,color:C.text}}>{isEdit?'¡Actualizado!':'¡Guardado!'}</div>
+      <div style={{fontSize:14,color:C.muted}}>Tu transacción fue {isEdit?'actualizada':'registrada'}.</div>
+    </div>
+  );
+
+  return (
+    <div className="anim-fade" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',background:'white'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'48px 20px 24px',flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}>
+          <button onClick={onClose} style={{width:38,height:38,borderRadius:11,background:'rgba(255,255,255,0.1)',border:'none',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'rgba(255,255,255,0.8)',flexShrink:0}}><I.Close/></button>
+          <div style={{fontSize:20,fontWeight:800,color:'white'}}>{isEdit?'Editar transacción':'Nueva transacción'}</div>
+        </div>
+        <div className="segmented">
+          <button className={`seg-btn ${type==='expense'?'active':''}`} onClick={()=>{setType('expense');setCat('');}} style={{color:type==='expense'?C.danger:'rgba(255,255,255,0.55)',background:type==='expense'?'white':'transparent'}}>Gasto</button>
+          <button className={`seg-btn ${type==='income'?'active':''}`} onClick={()=>{setType('income');setCat('');}} style={{color:type==='income'?C.accentDark:'rgba(255,255,255,0.55)',background:type==='income'?'white':'transparent'}}>Ingreso</button>
+        </div>
+      </div>
+      <div className="scroll-area" style={{padding:'24px 20px 32px',background:'white'}}>
+        <div style={{textAlign:'center',marginBottom:28}}>
+          <div style={{fontSize:13,color:C.muted,marginBottom:8,fontWeight:500}}>Monto en MXN</div>
+          <input style={{border:'none',outline:'none',fontSize:52,fontWeight:800,color:type==='expense'?C.danger:C.accentDark,textAlign:'center',width:'100%',fontFamily:'Inter,sans-serif',background:'transparent',letterSpacing:'-1px'}} placeholder="$0" value={amount} onChange={e=>setAmount(e.target.value)} type="number" inputMode="decimal"/>
+        </div>
+        <div className="form-row">
+          <label className="label">Descripción</label>
+          <input className="input" placeholder={type==='expense'?'ej. Starbucks, Uber, Walmart...':'ej. Nómina, cliente freelance...'} value={name} onChange={e=>setName(e.target.value)}/>
+        </div>
+        <div className="form-row">
+          <label className="label">Categoría</label>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+            {cats.map(c=><button key={c} onClick={()=>setCat(c)} style={{padding:'8px 18px',borderRadius:20,border:`1.5px solid ${cat===c?C.primary:C.border}`,background:cat===c?C.primary:'transparent',color:cat===c?'white':C.text,fontSize:14,fontWeight:cat===c?600:500,cursor:'pointer',fontFamily:'inherit',transition:'all 0.18s'}}>{c}</button>)}
+          </div>
+        </div>
+        <div className="form-row">
+          <label className="label">Fecha</label>
+          <input className="input" type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+        </div>
+        <div className="form-row">
+          <label className="label">Nota <span style={{color:C.muted,fontWeight:400}}>(opcional)</span></label>
+          <input className="input" placeholder="Agrega un detalle..." value={note} onChange={e=>setNote(e.target.value)}/>
+        </div>
+        <button className="btn-primary" onClick={save} disabled={!canSave} style={{marginBottom:isEdit?12:0}}>
+          {isEdit?'Actualizar transacción':'Guardar transacción'}
+        </button>
+        {isEdit&&!confirmDel&&(
+          <button className="btn-outline-danger" onClick={()=>setConfirmDel(true)}>Eliminar transacción</button>
+        )}
+        {isEdit&&confirmDel&&(
+          <div style={{marginTop:4,padding:'14px',background:'#fff5f5',border:'1.5px solid rgba(224,92,58,0.25)',borderRadius:14}}>
+            <div style={{fontSize:14,fontWeight:600,color:C.danger,marginBottom:10}}>¿Confirmar eliminación?</div>
+            <div style={{display:'flex',gap:8}}>
+              <button onClick={()=>onDelete(editTxn.id)} className="btn-danger" style={{flex:1,height:40,borderRadius:10,fontSize:14}}>Eliminar</button>
+              <button onClick={()=>setConfirmDel(false)} className="btn-outline" style={{flex:1,height:40,borderRadius:10,fontSize:14}}>Cancelar</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── 2. GOALS SCREEN ───────────────────────────────────────────────────────────
+const GoalsScreen = ({ goals, setScreen, onNew, onEdit }) => {
+  const totalTarget=goals.reduce((s,g)=>s+g.target,0);
+  const totalSaved=goals.reduce((s,g)=>s+g.saved,0);
+  return (
+    <div className="anim-fade" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'48px 20px 24px',flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:16}}>
+          <button onClick={()=>setScreen('profile')} style={{width:38,height:38,borderRadius:11,background:'rgba(255,255,255,0.1)',border:'none',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'rgba(255,255,255,0.8)',flexShrink:0}}><I.Back/></button>
+          <div style={{fontSize:22,fontWeight:800,color:'white',flex:1}}>Mis metas</div>
+          <button onClick={onNew} style={{background:C.accent,border:'none',color:'white',fontSize:13,fontWeight:700,padding:'7px 16px',borderRadius:20,cursor:'pointer',fontFamily:'inherit'}}>+ Nueva</button>
+        </div>
+        <div style={{background:'rgba(255,255,255,0.08)',borderRadius:16,padding:'14px',border:'1px solid rgba(255,255,255,0.1)'}}>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginBottom:6}}>Ahorro total en metas</div>
+          <div style={{fontSize:28,fontWeight:800,color:C.accent,marginBottom:10}}>{fmtAbs(totalSaved)} <span style={{fontSize:14,color:'rgba(255,255,255,0.4)',fontWeight:400}}>de {fmtAbs(totalTarget)}</span></div>
+          <div className="progress-bar" style={{background:'rgba(255,255,255,0.15)'}}><div className="progress-fill" style={{width:`${Math.min(totalSaved/totalTarget*100,100).toFixed(0)}%`,background:C.accent}}/></div>
+        </div>
+      </div>
+      <div className="scroll-area" style={{padding:'16px'}}>
+        {goals.length===0&&(
+          <div style={{textAlign:'center',padding:'60px 24px'}}>
+            <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+            <div style={{fontSize:18,fontWeight:700,color:C.text,marginBottom:8}}>Sin metas todavía</div>
+            <div style={{fontSize:14,color:C.muted,marginBottom:24}}>Crea tu primera meta de ahorro y empieza a celebrar cada avance.</div>
+            <button className="btn-primary" onClick={onNew} style={{maxWidth:240,margin:'0 auto'}}>Crear primera meta</button>
+          </div>
+        )}
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {goals.map((g)=>{
+            const pct=Math.min(g.saved/g.target*100,100);
+            const daysLeft=Math.ceil((new Date(g.deadline)-new Date('2026-04-22'))/(1000*60*60*24));
+            const done=g.saved>=g.target;
+            return (
+              <div key={g.id} className="card" style={{padding:'16px',border:done?`1.5px solid rgba(71,197,168,0.3)`:g.color==='#e05c3a'?`1.5px solid rgba(224,92,58,0.2)`:'none'}}>
+                <div style={{display:'flex',alignItems:'flex-start',gap:12,marginBottom:14}}>
+                  <div style={{width:48,height:48,borderRadius:16,background:g.color+'18',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,flexShrink:0}}>{g.icon}</div>
+                  <div style={{flex:1}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
+                      <div style={{fontSize:16,fontWeight:700}}>{g.name}</div>
+                      {done&&<span className="chip chip-accent">¡Lograda! 🎉</span>}
+                    </div>
+                    <div style={{fontSize:13,color:C.muted}}>{daysLeft>0?`${daysLeft} días restantes`:'Fecha vencida'}</div>
+                  </div>
+                  <button onClick={()=>onEdit(g)} style={{width:32,height:32,borderRadius:9,background:C.bg,border:'none',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:C.muted,flexShrink:0}}><I.Edit/></button>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+                  <span style={{fontSize:13,color:C.muted}}>Ahorrado</span>
+                  <span style={{fontSize:14,fontWeight:700,color:g.color}}>{fmtAbs(g.saved)} <span style={{color:C.muted,fontWeight:400}}>/ {fmtAbs(g.target)}</span></span>
+                </div>
+                <div className="progress-bar" style={{height:10,marginBottom:8}}><div className="progress-fill" style={{width:`${pct}%`,background:g.color}}/></div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span style={{fontSize:12,color:C.muted}}>{Math.round(pct)}% completado</span>
+                  <span style={{fontSize:12,color:C.muted}}>Falta: {fmtAbs(Math.max(g.target-g.saved,0))}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── PROFILE ───────────────────────────────────────────────────────────────────
+const ProfileScreen = ({ logout, setScreen }) => {
+  const menu = [
+    {Icon:I.Card,   label:'Cuentas vinculadas',sub:'2 cuentas activas',       action:()=>{}},
+    {Icon:I.Target, label:'Mis metas',          sub:'3 metas activas',         action:()=>setScreen('goals')},
+    {Icon:I.Bell,   label:'Notificaciones',      sub:'Push activadas',          action:()=>{}},
+    {Icon:I.Shield, label:'Seguridad',           sub:'Biometría habilitada',    action:()=>{}},
+    {Icon:I.Trending,label:'Exportar datos',     sub:'CSV y PDF disponibles',   action:()=>{}},
+    {Icon:I.Help,   label:'Ayuda y soporte',     sub:'',                        action:()=>{}},
+    {Icon:I.Logout, label:'Cerrar sesión',       sub:'',                        action:logout, danger:true},
+  ];
+  return (
+    <div className="anim-fade" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'48px 20px 28px',textAlign:'center',flexShrink:0}}>
+        <div style={{width:80,height:80,borderRadius:'50%',background:'rgba(255,255,255,0.1)',border:`3px solid ${C.accent}`,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px',fontSize:38}}>🧑</div>
+        <div style={{fontSize:22,fontWeight:800,color:'white'}}>Carlos Juárez</div>
+        <div style={{fontSize:14,color:'rgba(255,255,255,0.45)',marginTop:3}}>carlos@email.com</div>
+        <div style={{display:'inline-flex',alignItems:'center',gap:6,marginTop:12,padding:'6px 16px',borderRadius:20,background:'rgba(71,197,168,0.15)',border:'1px solid rgba(71,197,168,0.3)'}}>
+          <span style={{fontSize:12,color:C.accent,fontWeight:700}}>✦ Plan Pro</span>
+        </div>
+      </div>
+      <div style={{display:'flex',background:'white',borderBottom:`1px solid ${C.border}`,flexShrink:0}}>
+        {[{label:'Transacciones',value:'247'},{label:'Meses activo',value:'8'},{label:'Ahorro total',value:'$38,400'}].map((s,i)=>(
+          <div key={i} style={{flex:1,padding:'14px 8px',textAlign:'center',borderRight:i<2?`1px solid ${C.border}`:'none'}}>
+            <div style={{fontSize:18,fontWeight:800,color:C.primary}}>{s.value}</div>
+            <div style={{fontSize:11,color:C.muted,marginTop:2}}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+      <div className="scroll-area" style={{padding:'16px'}}>
+        <div className="card" style={{padding:'4px',marginBottom:24}}>
+          {menu.map((item,i)=>(
+            <div key={i}>
+              {i>0&&<div className="row-divider"/>}
+              <button onClick={item.action} style={{width:'100%',display:'flex',alignItems:'center',gap:14,padding:'13px 16px',border:'none',background:'none',cursor:'pointer',fontFamily:'inherit',textAlign:'left'}}>
+                <div style={{width:40,height:40,borderRadius:12,background:item.danger?'#fde8e4':C.bg,display:'flex',alignItems:'center',justifyContent:'center',color:item.danger?C.danger:C.primary,flexShrink:0}}><item.Icon/></div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:600,color:item.danger?C.danger:C.text}}>{item.label}</div>
+                  {item.sub&&<div style={{fontSize:12,color:C.muted,marginTop:1}}>{item.sub}</div>}
+                </div>
+                {!item.danger&&<div style={{color:C.muted,width:18,height:18}}><I.Chevron/></div>}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div style={{textAlign:'center',fontSize:12,color:C.muted,paddingBottom:8}}>Velto v1.1.0 · Hecho con ♥ en México</div>
+      </div>
+    </div>
+  );
+};
+
+// ── 3+4. TRANSACTION DETAIL SHEET ─────────────────────────────────────────────
+const TxnDetailSheet = ({ txn, onClose, onEdit }) => (
+  <div className="sheet-overlay" onClick={onClose}>
+    <div className="sheet-panel" onClick={e=>e.stopPropagation()}>
+      <div className="sheet-handle"/>
+      <div style={{padding:'16px 20px 0'}}>
+        {/* Icon + amount */}
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'16px 0 20px',borderBottom:`1px solid ${C.border}`}}>
+          <div style={{width:64,height:64,borderRadius:20,background:txn.type==='income'?C.accentLight:'#fde8e4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,marginBottom:12}}>{txn.icon}</div>
+          <div style={{fontSize:28,fontWeight:800,color:txn.type==='income'?C.accentDark:C.danger,letterSpacing:'-0.5px'}}>{fmt(txn.amount)}</div>
+          <div style={{fontSize:16,fontWeight:600,color:C.text,marginTop:4}}>{txn.name}</div>
+        </div>
+        {/* Details */}
+        <div style={{padding:'16px 0',borderBottom:`1px solid ${C.border}`,display:'flex',flexDirection:'column',gap:12}}>
+          {[
+            {label:'Categoría', value:<span className={`chip ${txn.type==='income'?'chip-accent':'chip-danger'}`}>{txn.cat}</span>},
+            {label:'Fecha',     value:dateLabel(txn.date)+' · '+txn.date},
+            {label:'Tipo',      value:txn.type==='income'?'Ingreso':'Gasto'},
+            ...(txn.note?[{label:'Nota', value:txn.note}]:[]),
+          ].map((r,i)=>(
+            <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span style={{fontSize:13,color:C.muted,fontWeight:500}}>{r.label}</span>
+              <span style={{fontSize:13,fontWeight:600,color:C.text}}>{r.value}</span>
+            </div>
+          ))}
+        </div>
+        {/* Actions */}
+        <div style={{display:'flex',gap:10,paddingTop:20}}>
+          <button className="btn-primary" onClick={()=>onEdit(txn)} style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:8,height:48,borderRadius:12}}>
+            <div style={{width:18,height:18}}><I.Edit/></div>Editar
+          </button>
+          <button className="btn-outline" onClick={onClose} style={{flex:1,height:48,borderRadius:12}}>Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ── 5. BUDGET FORM SHEET ──────────────────────────────────────────────────────
+const BudgetFormSheet = ({ budget, onSave, onDelete, onClose }) => {
+  const [name,setName]=useState(budget?.name||'');
+  const [icon,setIcon]=useState(budget?.icon||'🏷️');
+  const [limit,setLimit]=useState(budget?String(budget.budget):'');
+  const [color,setColor]=useState(budget?.color||C.primary);
+  const [confirmDel,setConfirmDel]=useState(false);
+  const isEdit=!!budget;
+  const canSave=name&&limit;
+  const save=()=>onSave({id:budget?.id||Date.now(),name,icon,budget:Number(limit),spent:budget?.spent||0,color});
+  return (
+    <div className="sheet-overlay" onClick={onClose}>
+      <div className="sheet-panel" onClick={e=>e.stopPropagation()}>
+        <div className="sheet-handle"/>
+        <div style={{padding:'8px 20px 0'}}>
+          <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:20}}>{isEdit?'Editar presupuesto':'Nuevo presupuesto'}</div>
+          <div className="form-row">
+            <label className="label">Categoría</label>
+            <input className="input" placeholder="ej. Comida, Transporte..." value={name} onChange={e=>setName(e.target.value)}/>
+          </div>
+          <div className="form-row">
+            <label className="label">Ícono</label>
+            <input className="input" placeholder="Escribe un emoji" value={icon} onChange={e=>setIcon(e.target.value)} style={{fontSize:22}}/>
+          </div>
+          <div className="form-row">
+            <label className="label">Límite mensual (MXN)</label>
+            <input className="input" type="number" placeholder="ej. 5000" value={limit} onChange={e=>setLimit(e.target.value)} inputMode="numeric"/>
+          </div>
+          <div className="form-row">
+            <label className="label">Color</label>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              {SWATCHES.map(sw=><div key={sw} className={`color-swatch ${color===sw?'selected':''}`} style={{background:sw}} onClick={()=>setColor(sw)}/>)}
+            </div>
+          </div>
+          <button className="btn-primary" onClick={save} disabled={!canSave} style={{marginBottom:isEdit?10:0}}>
+            {isEdit?'Actualizar presupuesto':'Crear presupuesto'}
+          </button>
+          {isEdit&&!confirmDel&&(
+            <button className="btn-outline-danger" onClick={()=>setConfirmDel(true)} style={{marginTop:10}}>Eliminar categoría</button>
+          )}
+          {isEdit&&confirmDel&&(
+            <div style={{marginTop:10,padding:'14px',background:'#fff5f5',border:'1.5px solid rgba(224,92,58,0.25)',borderRadius:14}}>
+              <div style={{fontSize:14,fontWeight:600,color:C.danger,marginBottom:10}}>¿Eliminar "{budget.name}"?</div>
+              <div style={{display:'flex',gap:8}}>
+                <button onClick={()=>onDelete(budget.id)} className="btn-danger" style={{flex:1,height:40,borderRadius:10,fontSize:14}}>Eliminar</button>
+                <button onClick={()=>setConfirmDel(false)} className="btn-outline" style={{flex:1,height:40,borderRadius:10,fontSize:14}}>Cancelar</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── GOAL FORM SHEET ───────────────────────────────────────────────────────────
+const GoalSheet = ({ goal, onSave, onDelete, onClose }) => {
+  const [name,setName]=useState(goal?.name||'');
+  const [icon,setIcon]=useState(goal?.icon||'🎯');
+  const [target,setTarget]=useState(goal?String(goal.target):'');
+  const [saved,setSaved2]=useState(goal?String(goal.saved):'0');
+  const [deadline,setDeadline]=useState(goal?.deadline||'2026-12-31');
+  const [color,setColor]=useState(goal?.color||C.accent);
+  const [confirmDel,setConfirmDel]=useState(false);
+  const isEdit=!!goal;
+  const canSave=name&&target;
+  const save=()=>onSave({id:goal?.id||Date.now(),name,icon,target:Number(target),saved:Number(saved),deadline,color});
+  return (
+    <div className="sheet-overlay" onClick={onClose}>
+      <div className="sheet-panel" onClick={e=>e.stopPropagation()}>
+        <div className="sheet-handle"/>
+        <div style={{padding:'8px 20px 0'}}>
+          <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:20}}>{isEdit?'Editar meta':'Nueva meta'}</div>
+          <div className="form-row">
+            <label className="label">Nombre</label>
+            <input className="input" placeholder="ej. Vacaciones, Emergencia..." value={name} onChange={e=>setName(e.target.value)}/>
+          </div>
+          <div className="form-row">
+            <label className="label">Ícono</label>
+            <input className="input" placeholder="Emoji" value={icon} onChange={e=>setIcon(e.target.value)} style={{fontSize:22}}/>
+          </div>
+          <div style={{display:'flex',gap:12,marginBottom:18}}>
+            <div style={{flex:1}}>
+              <label className="label">Meta total (MXN)</label>
+              <input className="input" type="number" placeholder="30000" value={target} onChange={e=>setTarget(e.target.value)} inputMode="numeric"/>
+            </div>
+            <div style={{flex:1}}>
+              <label className="label">Ya ahorrado</label>
+              <input className="input" type="number" placeholder="0" value={saved} onChange={e=>setSaved2(e.target.value)} inputMode="numeric"/>
+            </div>
+          </div>
+          <div className="form-row">
+            <label className="label">Fecha límite</label>
+            <input className="input" type="date" value={deadline} onChange={e=>setDeadline(e.target.value)}/>
+          </div>
+          <div className="form-row">
+            <label className="label">Color</label>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              {SWATCHES.map(sw=><div key={sw} className={`color-swatch ${color===sw?'selected':''}`} style={{background:sw}} onClick={()=>setColor(sw)}/>)}
+            </div>
+          </div>
+          <button className="btn-primary" onClick={save} disabled={!canSave} style={{marginBottom:isEdit?10:0}}>
+            {isEdit?'Actualizar meta':'Crear meta'}
+          </button>
+          {isEdit&&!confirmDel&&(
+            <button className="btn-outline-danger" onClick={()=>setConfirmDel(true)} style={{marginTop:10}}>Eliminar meta</button>
+          )}
+          {isEdit&&confirmDel&&(
+            <div style={{marginTop:10,padding:'14px',background:'#fff5f5',border:'1.5px solid rgba(224,92,58,0.25)',borderRadius:14}}>
+              <div style={{fontSize:14,fontWeight:600,color:C.danger,marginBottom:10}}>¿Eliminar "{goal.name}"?</div>
+              <div style={{display:'flex',gap:8}}>
+                <button onClick={()=>onDelete(goal.id)} className="btn-danger" style={{flex:1,height:40,borderRadius:10,fontSize:14}}>Eliminar</button>
+                <button onClick={()=>setConfirmDel(false)} className="btn-outline" style={{flex:1,height:40,borderRadius:10,fontSize:14}}>Cancelar</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── APP ROOT ──────────────────────────────────────────────────────────────────
+function App() {
+  const [onboarded,setOnboarded]=useState(()=>localStorage.getItem('v_ob')==='1');
+  const [loggedIn,setLoggedIn]=useState(false);
+  const [screen,setScreen]=useState('dashboard');
+  const [txns,setTxns]=useState(INIT_TXNS);
+  const [budgets,setBudgets]=useState(INIT_BUDGETS);
+  const [goals,setGoals]=useState(INIT_GOALS);
+  const [txnDetail,setTxnDetail]=useState(null);
+  const [editTxn,setEditTxn]=useState(null);
+  const [budgetForm,setBudgetForm]=useState(null);
+  const [goalForm,setGoalForm]=useState(null);
+
+  const saveTxn=t=>{ if(t.id&&txns.find(x=>x.id===t.id)){setTxns(p=>p.map(x=>x.id===t.id?t:x));}else{setTxns(p=>[{...t,id:Date.now()},...p]);} };
+  const deleteTxn=id=>setTxns(p=>p.filter(t=>t.id!==id));
+  const saveBudget=b=>{ if(b.id&&budgets.find(x=>x.id===b.id)){setBudgets(p=>p.map(x=>x.id===b.id?b:x));}else{setBudgets(p=>[...p,{...b,id:Date.now()}]);} };
+  const deleteBudget=id=>setBudgets(p=>p.filter(b=>b.id!==id));
+  const saveGoal=g=>{ if(g.id&&goals.find(x=>x.id===g.id)){setGoals(p=>p.map(x=>x.id===g.id?g:x));}else{setGoals(p=>[...p,{...g,id:Date.now()}]);} };
+  const deleteGoal=id=>setGoals(p=>p.filter(g=>g.id!==id));
+
+  if(!onboarded) return <OnboardingScreen onDone={()=>{localStorage.setItem('v_ob','1');setOnboarded(true);}}/>;
+  if(!loggedIn)  return <LoginScreen onLogin={()=>setLoggedIn(true)}/>;
+
+  const hideNav = screen==='new'||screen==='edit-txn'||screen==='goals';
+
+  let mainContent;
+  if(screen==='new'){
+    mainContent=<NewScreen onSave={t=>{saveTxn(t);setScreen('dashboard');}} onClose={()=>setScreen('dashboard')}/>;
+  } else if(screen==='edit-txn'&&editTxn){
+    mainContent=<NewScreen editTxn={editTxn} onSave={t=>{saveTxn(t);setEditTxn(null);setScreen('transactions');}} onDelete={id=>{deleteTxn(id);setEditTxn(null);setScreen('transactions');}} onClose={()=>{setEditTxn(null);setScreen('transactions');}}/>;
+  } else if(screen==='goals'){
+    mainContent=<GoalsScreen goals={goals} setScreen={setScreen} onNew={()=>setGoalForm('new')} onEdit={g=>setGoalForm(g)}/>;
+  } else {
+    switch(screen){
+      case 'dashboard':    mainContent=<DashboardScreen txns={txns} setScreen={setScreen} onTxnClick={setTxnDetail}/>; break;
+      case 'transactions': mainContent=<TransactionsScreen txns={txns} budgets={budgets} setScreen={setScreen} onTxnClick={setTxnDetail} onBudgetEdit={b=>setBudgetForm(b)} onBudgetNew={()=>setBudgetForm('new')}/>; break;
+      case 'reports':      mainContent=<ReportsScreen/>; break;
+      case 'profile':      mainContent=<ProfileScreen logout={()=>{setLoggedIn(false);setScreen('dashboard');}} setScreen={setScreen}/>; break;
+      default:             mainContent=<DashboardScreen txns={txns} setScreen={setScreen} onTxnClick={setTxnDetail}/>;
+    }
+  }
+
+  return (
+    <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',position:'relative'}}>
+      <div key={screen} style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',position:'relative'}}>
+        {mainContent}
+        {/* Overlays */}
+        {txnDetail&&<TxnDetailSheet txn={txnDetail} onClose={()=>setTxnDetail(null)} onEdit={t=>{setTxnDetail(null);setEditTxn(t);setScreen('edit-txn');}}/>}
+        {budgetForm&&<BudgetFormSheet budget={budgetForm==='new'?null:budgetForm} onSave={b=>{saveBudget(b);setBudgetForm(null);}} onDelete={id=>{deleteBudget(id);setBudgetForm(null);}} onClose={()=>setBudgetForm(null)}/>}
+        {goalForm&&<GoalSheet goal={goalForm==='new'?null:goalForm} onSave={g=>{saveGoal(g);setGoalForm(null);}} onDelete={id=>{deleteGoal(id);setGoalForm(null);}} onClose={()=>setGoalForm(null)}/>}
+      </div>
+      {!hideNav&&<BottomNav screen={screen} setScreen={setScreen}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
