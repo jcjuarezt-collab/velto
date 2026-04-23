@@ -3,46 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Velto — Tus finanzas con claridad</title>
+  <title>Velto — Tu copiloto financiero</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #2d1a4a; --accent: #47C5A8; --accent-dark: #35a08a;
-      --accent-light: rgba(71,197,168,0.12); --danger: #e05c3a;
+      --primary: #0F172A; --purple: #6C5DD3; --accent: #27C3A6; --accent-dark: #1da08e;
+      --accent-light: rgba(39,195,166,0.12); --danger: #e05c3a;
       --danger-light: #fde8e4; --warning: #f59e0b; --success: #10b981;
-      --success-light: #d1fae5; --bg: #f2f0f6; --card: #fff;
-      --text: #1a1a2e; --muted: #6b7280; --border: #e5e7eb;
+      --success-light: #d1fae5; --bg: #F7F8FA; --card: #fff;
+      --text: #0F172A; --muted: #64748b; --border: #e2e8f0;
+      --gradient: linear-gradient(135deg, #6C5DD3, #27C3A6);
     }
     html, body { height: 100%; }
-    body { background: #120c1f; font-family: 'Inter', system-ui, sans-serif; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    #root { width: 100%; max-width: 430px; height: 100vh; background: var(--bg); position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 100px rgba(71,197,168,0.08), 0 0 40px rgba(0,0,0,0.6); }
+    body { background: #0a0f1e; font-family: 'Poppins', system-ui, sans-serif; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    #root { width: 100%; max-width: 430px; height: 100vh; background: var(--bg); position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 100px rgba(108,93,211,0.15), 0 0 40px rgba(0,0,0,0.6); }
     @media (min-width: 600px) { #root { border-radius: 40px; height: 90vh; } body { padding: 20px; } }
     .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .scroll-area::-webkit-scrollbar { display: none; }
     .bottom-nav { display: flex; align-items: center; background: var(--card); border-top: 1px solid var(--border); height: 64px; flex-shrink: 0; position: relative; z-index: 20; }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: none; color: var(--muted); font-family: inherit; font-size: 10px; font-weight: 500; padding: 6px 4px; transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
-    .nav-item.active { color: var(--primary); }
+    .nav-item.active { color: var(--purple); }
     .nav-item svg { width: 22px; height: 22px; }
     .nav-fab-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .nav-fab { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #3d2a5a 0%, var(--primary) 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid var(--bg); box-shadow: 0 4px 20px rgba(45,26,74,0.45); margin-top: -16px; transition: transform 0.15s; }
+    .nav-fab { width: 52px; height: 52px; border-radius: 50%; background: var(--gradient); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid var(--bg); box-shadow: 0 4px 20px rgba(108,93,211,0.45); margin-top: -16px; transition: transform 0.15s; }
     .nav-fab:active { transform: scale(0.93); }
     .card { background: var(--card); border-radius: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
-    .btn-primary { background: var(--primary); color: white; border: none; border-radius: 14px; height: 52px; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s, transform 0.1s; }
+    .btn-primary { background: var(--gradient); color: white; border: none; border-radius: 14px; height: 52px; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s, transform 0.1s; }
     .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
     .btn-primary:disabled { opacity: 0.4; cursor: default; }
     .btn-danger { background: var(--danger); color: white; border: none; border-radius: 14px; height: 48px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
     .btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; height: 48px; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; }
     .btn-outline-danger { background: transparent; color: var(--danger); border: 1.5px solid rgba(224,92,58,0.35); border-radius: 14px; height: 48px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
     .input { width: 100%; height: 50px; border: 1.5px solid var(--border); border-radius: 12px; padding: 0 16px; font-family: inherit; font-size: 15px; color: var(--text); background: white; outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
-    .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45,26,74,0.08); }
+    .input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(108,93,211,0.1); }
     .segmented { display: flex; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 3px; gap: 2px; }
     .seg-btn { flex: 1; height: 34px; border-radius: 9px; border: none; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: rgba(255,255,255,0.55); transition: all 0.2s; }
-    .seg-btn.active { background: white; color: var(--primary); font-weight: 700; box-shadow: 0 1px 6px rgba(0,0,0,0.12); }
+    .seg-btn.active { background: white; color: var(--purple); font-weight: 700; box-shadow: 0 1px 6px rgba(0,0,0,0.12); }
     .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
     .chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
@@ -75,7 +76,7 @@
     /* ── DESKTOP / WEB SIDEBAR ───────────────────────────────────────────── */
     .sidebar-web {
       display: none; flex-direction: column; width: 252px; flex-shrink: 0;
-      background: linear-gradient(180deg, #1d1030 0%, #2d1a4a 100%);
+      background: linear-gradient(180deg, #080c18 0%, #0F172A 100%);
       padding: 28px 16px 24px;
       border-right: 1px solid rgba(255,255,255,0.06);
     }
@@ -86,10 +87,10 @@
       background: transparent; color: rgba(255,255,255,0.5); font-weight: 400;
     }
     .sidebar-nav-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
-    .sidebar-nav-btn.active { background: rgba(255,255,255,0.13); color: white; font-weight: 600; }
+    .sidebar-nav-btn.active { background: rgba(108,93,211,0.25); color: white; font-weight: 600; border-left: 3px solid #6C5DD3; padding-left: 11px; }
     .sidebar-nav-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
     @media (min-width: 768px) {
-      body { background: #0f0a1a; align-items: stretch; padding: 0; }
+      body { background: #0a0f1e; align-items: stretch; padding: 0; }
       #root { max-width: 100%; border-radius: 0; box-shadow: none; }
       .sidebar-web { display: flex; }
     }
@@ -101,12 +102,13 @@
 const { useState } = React;
 
 const C = {
-  primary:'#2d1a4a', primaryDark:'#1d1030', accent:'#47C5A8', accentDark:'#35a08a',
-  accentLight:'rgba(71,197,168,0.12)', danger:'#e05c3a', dangerLight:'#fde8e4',
-  warning:'#f59e0b', success:'#10b981', successLight:'#d1fae5',
-  bg:'#f2f0f6', card:'#fff', text:'#1a1a2e', muted:'#6b7280', border:'#e5e7eb',
+  primary:'#0F172A', primaryDark:'#080c18', purple:'#6C5DD3', purpleLight:'rgba(108,93,211,0.12)',
+  accent:'#27C3A6', accentDark:'#1da08e', accentLight:'rgba(39,195,166,0.12)',
+  gradient:'linear-gradient(135deg,#6C5DD3,#27C3A6)',
+  danger:'#e05c3a', dangerLight:'#fde8e4', warning:'#f59e0b', success:'#10b981', successLight:'#d1fae5',
+  bg:'#F7F8FA', card:'#fff', text:'#0F172A', muted:'#64748b', border:'#e2e8f0',
 };
-const SWATCHES = [C.primary, C.accent, C.danger, C.success, '#9b6dbd', '#f59e0b', '#3b82f6', '#ec4899'];
+const SWATCHES = [C.purple, C.accent, C.danger, C.success, '#8b5cf6', '#f59e0b', '#3b82f6', '#ec4899'];
 
 // ── INITIAL DATA ──────────────────────────────────────────────────────────────
 const INIT_TXNS = [
@@ -124,16 +126,16 @@ const INIT_TXNS = [
   { id:12, name:'H&M',                   icon:'👕', cat:'Ropa',       amount:-1200, date:'2026-04-15', type:'expense', note:'' },
 ];
 const INIT_BUDGETS = [
-  { id:1, name:'Comida',          icon:'🍽', budget:7000, spent:6916, color:C.primary },
+  { id:1, name:'Comida',          icon:'🍽', budget:7000, spent:6916, color:C.purple  },
   { id:2, name:'Transporte',      icon:'🚗', budget:5000, spent:4004, color:C.accent  },
   { id:3, name:'Entretenimiento', icon:'🎬', budget:3000, spent:3276, color:C.danger  },
   { id:4, name:'Salud',           icon:'💊', budget:2500, spent:930,  color:C.success },
-  { id:5, name:'Ropa',            icon:'👕', budget:2000, spent:1200, color:'#9b6dbd' },
+  { id:5, name:'Ropa',            icon:'👕', budget:2000, spent:1200, color:'#8b5cf6' },
 ];
 const INIT_GOALS = [
-  { id:1, name:'Vacaciones Europa', icon:'✈️', target:30000, saved:18200, deadline:'2026-06-30', color:C.accent   },
-  { id:2, name:'Fondo emergencia',  icon:'🛡️', target:50000, saved:32000, deadline:'2026-12-31', color:C.primary  },
-  { id:3, name:'MacBook Pro',       icon:'💻', target:42000, saved:5000,  deadline:'2026-10-15', color:'#9b6dbd' },
+  { id:1, name:'Viaje a Japón',    icon:'✈️', target:30000, saved:18200, deadline:'2026-06-30', color:C.accent  },
+  { id:2, name:'Fondo emergencia', icon:'🛡️', target:50000, saved:32000, deadline:'2026-12-31', color:C.purple  },
+  { id:3, name:'MacBook Pro',      icon:'💻', target:42000, saved:5000,  deadline:'2026-10-15', color:'#8b5cf6' },
 ];
 const MONTHLY = {
   labels:['Oct','Nov','Dic','Ene','Feb','Mar','Abr'],
@@ -180,9 +182,9 @@ const BarChart = ({ income, expenses, labels }) => {
       {labels.map((lbl,i)=>{
         const x=i*(gW+10),ih=(income[i]/max)*H,eh=(expenses[i]/max)*H;
         return <g key={i} transform={`translate(${x},0)`}>
-          <rect x={0} y={H-ih} width={bW} height={ih} rx="3" fill={C.primary} fillOpacity="0.75"/>
+          <rect x={0} y={H-ih} width={bW} height={ih} rx="3" fill={C.purple} fillOpacity="0.75"/>
           <rect x={bW+gap} y={H-eh} width={bW} height={eh} rx="3" fill={C.accent}/>
-          <text x={gW/2} y={H+14} textAnchor="middle" fontSize="9" fill={C.muted} fontFamily="Inter,sans-serif">{lbl}</text>
+          <text x={gW/2} y={H+14} textAnchor="middle" fontSize="9" fill={C.muted} fontFamily="Poppins,sans-serif">{lbl}</text>
         </g>;
       })}
     </svg>
@@ -228,8 +230,8 @@ const I = {
 
 // ── BOTTOM NAV ────────────────────────────────────────────────────────────────
 const BottomNav = ({ screen, setScreen }) => {
-  const left  = [{id:'dashboard',label:'Inicio',Icon:I.Home},{id:'transactions',label:'Listas',Icon:I.List}];
-  const right = [{id:'reports',label:'Reportes',Icon:I.Chart},{id:'profile',label:'Perfil',Icon:I.User}];
+  const left  = [{id:'dashboard',label:'Inicio',Icon:I.Home},{id:'transactions',label:'Movimientos',Icon:I.List}];
+  const right = [{id:'reports',label:'Analítica',Icon:I.Chart},{id:'profile',label:'Perfil',Icon:I.User}];
   const NavBtn = ({id,label,Icon}) => (
     <button className={`nav-item ${screen===id?'active':''}`} onClick={()=>setScreen(id)}>
       <Icon/><span>{label}</span>
@@ -259,10 +261,10 @@ const OnboardingScreen = ({ onDone }) => {
   return (
     <div style={{flex:1,display:'flex',flexDirection:'column',background:'white',overflow:'hidden'}}>
       {/* Illustration */}
-      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,flex:'0 0 55%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',overflow:'hidden'}}>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark} 0%,#1a1f3e 50%,#0F172A 100%)`,flex:'0 0 55%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',overflow:'hidden'}}>
         {/* Decorative rings */}
-        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',border:'1px solid rgba(71,197,168,0.12)',top:'50%',left:'50%',transform:'translate(-50%,-50%)'}}/>
-        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',border:'1px solid rgba(71,197,168,0.18)',top:'50%',left:'50%',transform:'translate(-50%,-50%)'}}/>
+        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',border:'1px solid rgba(108,93,211,0.15)',top:'50%',left:'50%',transform:'translate(-50%,-50%)'}}/>
+        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',border:'1px solid rgba(39,195,166,0.2)',top:'50%',left:'50%',transform:'translate(-50%,-50%)'}}/>
         <div key={step} className="anim-ob" style={{fontSize:88,lineHeight:1,marginBottom:16}}>{s.emoji}</div>
         {/* Dots */}
         <div style={{display:'flex',gap:6,position:'absolute',bottom:24}}>
@@ -300,13 +302,18 @@ const LoginScreen = ({ onLogin }) => {
   const handle = () => { setLoading(true); setTimeout(()=>{setLoading(false);onLogin();},1200); };
   return (
     <div className="anim-fade" style={{flex:1,background:'white',display:'flex',flexDirection:'column',overflow:'auto'}}>
-      <div style={{background:`linear-gradient(160deg,${C.primaryDark},${C.primary})`,padding:'60px 32px 56px',textAlign:'center',position:'relative',overflow:'hidden'}}>
-        <div style={{position:'absolute',top:-40,right:-40,width:180,height:180,borderRadius:'50%',background:'rgba(71,197,168,0.06)',border:'1px solid rgba(71,197,168,0.1)'}}/>
-        <div style={{width:76,height:76,borderRadius:24,background:'rgba(71,197,168,0.15)',border:'1.5px solid rgba(71,197,168,0.3)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
-          <span style={{fontSize:38}}>₱</span>
+      <div style={{background:`linear-gradient(160deg,${C.primaryDark} 0%,#1a1f3e 60%,#0F172A 100%)`,padding:'60px 32px 56px',textAlign:'center',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-40,right:-40,width:200,height:200,borderRadius:'50%',background:'rgba(108,93,211,0.08)',border:'1px solid rgba(108,93,211,0.12)'}}/>
+        <div style={{position:'absolute',bottom:20,left:-20,width:120,height:120,borderRadius:'50%',background:'rgba(39,195,166,0.06)',border:'1px solid rgba(39,195,166,0.1)'}}/>
+        {/* Velto V logo */}
+        <div style={{margin:'0 auto 18px',width:80,height:80,borderRadius:22,background:'rgba(255,255,255,0.06)',border:'1.5px solid rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <svg width="44" height="36" viewBox="0 0 44 36" fill="none">
+            <defs><linearGradient id="vg" x1="0" y1="0" x2="44" y2="36" gradientUnits="userSpaceOnUse"><stop stopColor="#6C5DD3"/><stop offset="1" stopColor="#27C3A6"/></linearGradient></defs>
+            <path d="M2 2 L14 30 L22 14 L30 30 L42 2" stroke="url(#vg)" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
         </div>
         <div style={{fontSize:36,fontWeight:800,color:'white',letterSpacing:'-1px'}}>Velto</div>
-        <div style={{fontSize:15,color:'rgba(255,255,255,0.5)',marginTop:6}}>Tus finanzas, con claridad</div>
+        <div style={{fontSize:14,color:'rgba(255,255,255,0.45)',marginTop:6,fontWeight:500,letterSpacing:'0.2px'}}>Tu copiloto financiero</div>
         <div style={{position:'absolute',bottom:-1,left:0,right:0}}>
           <svg viewBox="0 0 430 32" preserveAspectRatio="none" style={{width:'100%',height:32,display:'block'}}><path d="M0,32 C100,4 330,32 430,12 L430,32 Z" fill="white"/></svg>
         </div>
@@ -322,7 +329,7 @@ const LoginScreen = ({ onLogin }) => {
             <input className="input" type={showPass?'text':'password'} placeholder="••••••••" value={pass} onChange={e=>setPass(e.target.value)} style={{paddingRight:46}}/>
             <button onClick={()=>setShowPass(v=>!v)} style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:C.muted,width:20,height:20,padding:0}}><I.Eye/></button>
           </div>
-          <div style={{textAlign:'right'}}><span style={{fontSize:13,color:C.primary,fontWeight:600,cursor:'pointer'}}>¿Olvidaste tu contraseña?</span></div>
+          <div style={{textAlign:'right'}}><span style={{fontSize:13,color:C.purple,fontWeight:600,cursor:'pointer'}}>¿Olvidaste tu contraseña?</span></div>
         </div>
         <button className="btn-primary" onClick={handle} disabled={loading} style={{marginTop:4}}>
           {loading?<span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><span style={{width:16,height:16,border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'white',borderRadius:'50%',display:'inline-block',animation:'spin 0.7s linear infinite'}}/>Iniciando sesión...</span>:'Entrar'}
@@ -952,18 +959,26 @@ const GoalSheet = ({ goal, onSave, onDelete, onClose }) => {
 
 // ── WEB SIDEBAR ───────────────────────────────────────────────────────────────
 const NAV_ITEMS=[
-  {id:'dashboard', label:'Inicio',     icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
-  {id:'transactions',label:'Finanzas', icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>},
-  {id:'reports',   label:'Reportes',  icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
-  {id:'goals',     label:'Metas',     icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>},
-  {id:'profile',   label:'Perfil',    icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+  {id:'dashboard',    label:'Inicio',       icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
+  {id:'transactions', label:'Movimientos',  icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>},
+  {id:'reports',      label:'Analítica',    icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>},
+  {id:'goals',        label:'Metas',        icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>},
+  {id:'profile',      label:'Perfil',       icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
 ];
 function WebSidebar({screen,setScreen}){
   return(
     <div className="sidebar-web">
       <div style={{display:'flex',alignItems:'center',gap:10,padding:'0 6px',marginBottom:32}}>
-        <div style={{width:34,height:34,borderRadius:10,background:'linear-gradient(135deg,#47C5A8,#2d9e87)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:16,color:'#fff'}}>V</div>
-        <span style={{fontWeight:700,fontSize:18,color:'#fff',letterSpacing:'-0.3px'}}>Velto</span>
+        <div style={{width:36,height:36,borderRadius:10,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <svg width="22" height="18" viewBox="0 0 44 36" fill="none">
+            <defs><linearGradient id="vg2" x1="0" y1="0" x2="44" y2="36" gradientUnits="userSpaceOnUse"><stop stopColor="#6C5DD3"/><stop offset="1" stopColor="#27C3A6"/></linearGradient></defs>
+            <path d="M2 2 L14 30 L22 14 L30 30 L42 2" stroke="url(#vg2)" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
+        </div>
+        <div>
+          <div style={{fontWeight:700,fontSize:17,color:'#fff',letterSpacing:'-0.3px',lineHeight:1.1}}>Velto</div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',fontWeight:400,letterSpacing:'0.2px'}}>Tu copiloto financiero</div>
+        </div>
       </div>
       <div style={{display:'flex',flexDirection:'column',gap:4,flex:1}}>
         {NAV_ITEMS.map(n=>(
